@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор случайных цитат</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; min-height: 100vh; display: flex; align-items: center; }
+        .quote-card { transition: all 0.3s ease; }
+        .quote-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .quote-text { font-size: 1.2rem; line-height: 1.6; }
+        .author-text { font-style: italic; color: #6c757d; }
+        .error-text { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card quote-card shadow">
+                    <div class="card-body text-center p-4">
+                        <h1 class="mb-4">Случайные цитаты</h1>
+
+                        <div id="quote-container">
+                            <div class="quote-text mb-3" id="quote-text">
+                                Нажмите кнопку, чтобы получить цитату
+                            </div>
+                            <div class="author-text" id="quote-author"></div>
+                            <div class="error-text mt-2" id="error-message"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-center my-3">
+                            <div class="spinner-border text-primary" id="loading" style="display: none;" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary mt-3" id="get-quote-btn">
+                            Получить новую цитату
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Локальные резервные цитаты
+        const backupQuotes = [
+            {content: "Мы сами должны стать теми переменами, которые хотим увидеть в мире.", author: "Махатма Ганди"},
+            {content: "Единственный способ сделать великую работу — любить то, что ты делаешь.", author: "Стив Джобс"},
+            {content: "Ваше время ограничено, не тратьте его, живя чужой жизнью.", author: "Стив Джобс"},
+            {content: "Победа — это еще не все, все — это постоянное желание побеждать.", author: "Винс Ломбарди"},
+            {content: "Жизнь — это то, что происходит с нами, пока мы строим другие планы.", author: "Джон Леннон"}
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const quoteText = document.getElementById('quote-text');
+            const quoteAuthor = document.getElementById('quote-author');
+            const errorMessage = document.getElementById('error-message');
+            const getQuoteBtn = document.getElementById('get-quote-btn');
+            const loading = document.getElementById('loading');
+
+            async function fetchQuote() {
+                try {
+                    // Показываем индикатор загрузки
+                    loading.style.display = 'block';
+                    quoteText.textContent = 'Загружаем цитату...';
+                    quoteAuthor.textContent = '';
+                    errorMessage.textContent = '';
+
+                    // Пробуем получить цитату с нашего сервера
+                    const response = await fetch('/get_quote');
+
+                    if (!response.ok) {
+                        throw new Error('Сервер не смог получить цитату');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Обновляем DOM с новой цитатой
+                    displayQuote(data.content, data.author);
+
+                } catch (error) {
+                    console.error('Ошибка при получении цитаты:', error);
+
+                    // Используем резервную цитату
+                    const randomBackup = backupQuotes[Math.floor(Math.random() * backupQuotes.length)];
+                    displayQuote(randomBackup.content, randomBackup.author);
+
+                    errorMessage.textContent = ' ';
+                } finally {
+                    // Скрываем индикатор загрузки
+                    loading.style.display = 'none';
+                }
+            }
+
+            function displayQuote(content, author) {
+                quoteText.textContent = `"${content}"`;
+                quoteAuthor.textContent = `— ${author}`;
+            }
+
+            // Обработчик клика по кнопке
+            getQuoteBtn.addEventListener('click', fetchQuote);
+
+            // Загружаем первую цитату при загрузке страницы
+            fetchQuote();
+        });
+    </script>
+</body>
+</html>

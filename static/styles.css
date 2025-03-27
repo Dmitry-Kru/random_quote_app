@@ -1,0 +1,25 @@
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.quote-card {
+    transition: all 0.3s ease;
+}
+
+.quote-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.quote-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.author-text {
+    font-style: italic;
+    color: #6c757d;
+}
